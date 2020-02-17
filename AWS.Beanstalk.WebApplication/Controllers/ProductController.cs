@@ -6,6 +6,8 @@ using Amazon.XRay.Recorder.Core;
 using Amazon.XRay.Recorder.Handlers.SqlServer;
 using Amazon.XRay.Recorder.Handlers.System.Net;
 using AWS.Beanstalk.WebApplication.Models;
+using AWS.Beanstalk.WebApplication.Utils;
+using log4net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -19,6 +21,8 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 {
     public class ProductController : Controller
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(ProductController));
+
         static readonly Lazy<AmazonDynamoDBClient> LazyDdbClient;
 
         static readonly Lazy<Table> LazyTable;
@@ -37,6 +41,7 @@ namespace AWS.Beanstalk.WebApplication.Controllers
                     r = RegionEndpoint.EUWest3; // configure here the default region, when running locally 
                 }
 
+                log.Info($"AWS region is {r}");
                 var client = new AmazonDynamoDBClient(r);
 
                 return client;
@@ -44,7 +49,15 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 
             LazyTable = new Lazy<Table>(() =>
             {
-                var tableName = "Product";
+                var tableName = ConfigHelper.Get("MY_TABLE_ENV_VARIABLE");
+                if (string.IsNullOrEmpty(tableName))
+                {
+                    // Elastic Beanstalk doesn't support passing environment variables to .NET Core applications and multiple-application IIS deployments that use a deployment manifest. 
+                    // https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-softwaresettings.html
+                    log.Warn("Table not found, set to default name ..");
+                    tableName = "Product";
+                }
+
                 return Table.LoadTable(LazyDdbClient.Value, tableName);
             });
         }
@@ -78,7 +91,7 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 
                 return View(product);
             }
-            catch (ProductNotFoundException e)
+            catch (ProductNotFoundException)
             {
                 throw;
                 //return "Product not found !";// NotFound();
