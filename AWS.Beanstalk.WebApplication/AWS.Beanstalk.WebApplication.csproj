@@ -5,6 +5,13 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="scripts\**" />
+    <Content Remove="scripts\**" />
+    <EmbeddedResource Remove="scripts\**" />
+    <None Remove="scripts\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.14.12" />
@@ -30,13 +37,10 @@
 
 
   <ItemGroup>
-    <Content Include=".ebextensions\02-create-dynamodb-env.config">
+    <Content Include=".ebextensions\02-create-sns-topic.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include=".ebextensions\03-create-sns-topic.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include=".ebextensions\04-options.config">
+    <Content Include=".ebextensions\03-options.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include=".ebextensions\01-create-dynamodb-table.config">

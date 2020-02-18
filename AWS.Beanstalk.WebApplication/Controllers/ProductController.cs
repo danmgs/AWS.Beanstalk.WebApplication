@@ -5,30 +5,39 @@ using Amazon.Util;
 using Amazon.XRay.Recorder.Core;
 using Amazon.XRay.Recorder.Handlers.SqlServer;
 using Amazon.XRay.Recorder.Handlers.System.Net;
+using AWS.Beanstalk.WebApplication.ActionFilters;
 using AWS.Beanstalk.WebApplication.Models;
 using AWS.Beanstalk.WebApplication.Utils;
 using log4net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace AWS.Beanstalk.WebApplication.Controllers
 {
+    //[XRayActionFilter] TODO: not working: x-ray traces will be missing.
     public class ProductController : Controller
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(ProductController));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ProductController));
 
-        static readonly Lazy<AmazonDynamoDBClient> LazyDdbClient;
+        private readonly Lazy<AmazonDynamoDBClient> LazyDdbClient;
 
-        static readonly Lazy<Table> LazyTable;
+        private readonly Lazy<Table> LazyTable;
 
-        static ProductController()
+        private IConfiguration _configuration;
+
+        public ProductController(IConfiguration configuration)
         {
+            _configuration = configuration;
+            string tableName = _configuration.GetValue<string>("TableName");
+            string region = _configuration.GetValue<string>("Region");
             LazyDdbClient = new Lazy<AmazonDynamoDBClient>(() =>
             {
                 RegionEndpoint r;
@@ -38,10 +47,11 @@ namespace AWS.Beanstalk.WebApplication.Controllers
                 }
                 catch (Exception)
                 {
-                    r = RegionEndpoint.EUWest3; // configure here the default region, when running locally 
+                    // when running locally, the region is configured in appsettings.json.
+                    r = RegionEndpoint.EnumerableAllRegions.Where(reg => reg.SystemName.Equals(region)).FirstOrDefault();
                 }
 
-                log.Info($"AWS region is {r}");
+                _log.Info($"AWS region is {r}");
                 var client = new AmazonDynamoDBClient(r);
 
                 return client;
@@ -49,15 +59,6 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 
             LazyTable = new Lazy<Table>(() =>
             {
-                var tableName = ConfigHelper.Get("MY_TABLE_ENV_VARIABLE");
-                if (string.IsNullOrEmpty(tableName))
-                {
-                    // Elastic Beanstalk doesn't support passing environment variables to .NET Core applications and multiple-application IIS deployments that use a deployment manifest. 
-                    // https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-softwaresettings.html
-                    log.Warn("Table not found, set to default name ..");
-                    tableName = "Product";
-                }
-
                 return Table.LoadTable(LazyDdbClient.Value, tableName);
             });
         }
@@ -77,8 +78,6 @@ namespace AWS.Beanstalk.WebApplication.Controllers
         {
             try
             {
-                AWSXRayRecorder.Instance.AddAnnotation("Get", id);
-
                 var product = AWSXRayRecorder.Instance.TraceMethod<Product>("DetailsProduct", () => DetailsProduct(id));
 
                 // Trace out-going HTTP request
@@ -189,14 +188,19 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 
         private static void MakeDummyHttpWebRequest(string id)
         {
-            AWSXRayRecorder.Instance.AddAnnotation("WebRequestCall", id);
+            string websiteUrl = "http://www.amazon.com";
+            AWSXRayRecorder.Instance.AddAnnotation("productId", id);
+            AWSXRayRecorder.Instance.AddAnnotation("websiteUrl", websiteUrl);
+            AWSXRayRecorder.Instance.AddAnnotation("operationType", "MakeDummyHttpWebRequest");
             HttpWebRequest request = null;
-            request = (HttpWebRequest)WebRequest.Create("http://www.amazon.com");
+            request = (HttpWebRequest)WebRequest.Create(websiteUrl);
             request.GetResponseTraced();
         }
 
         private IEnumerable<Product> ScanAllProducts()
         {
+            AWSXRayRecorder.Instance.AddAnnotation("operationType", "ScanAllProducts");
+
             List<Product> list;
             var items = LazyTable.Value.Scan(new ScanFilter()).GetRemainingAsync();
             if (items == null)
@@ -214,6 +218,8 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 
         private Product DetailsProduct(string id)
         {
+            AWSXRayRecorder.Instance.AddAnnotation("productId", id);
+            AWSXRayRecorder.Instance.AddAnnotation("operationType", "DetailsProduct");
             var item = LazyTable.Value.GetItemAsync(id).Result;
             if (item == null)
             {
@@ -225,6 +231,7 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 
         private async Task<Document> CreateProduct<TResult>(Product product)
         {
+            AWSXRayRecorder.Instance.AddAnnotation("operationType", "CreateProduct");
             var document = new Document();
             document["Id"] = product.Id;
             document["Name"] = product.Name;
@@ -235,6 +242,8 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 
         private async Task<Document> EditProduct<TResult>(Product product)
         {
+            AWSXRayRecorder.Instance.AddAnnotation("productId", product.Id);
+            AWSXRayRecorder.Instance.AddAnnotation("operationType", "EditProduct");
             var document = new Document();
             document["Id"] = product.Id;
             document["Name"] = product.Name;
@@ -245,6 +254,8 @@ namespace AWS.Beanstalk.WebApplication.Controllers
 
         private async Task<Document> DeleteProduct<TResult>(string id)
         {
+            AWSXRayRecorder.Instance.AddAnnotation("productId", id);
+            AWSXRayRecorder.Instance.AddMetadata("operationType", "DeleteProduct");
             var document = new Document();
             document["Id"] = id;
 

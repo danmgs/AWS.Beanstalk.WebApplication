@@ -41,10 +41,29 @@ EC2 profile should look like :
 
 ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/configure_ec2_profile.PNG)
 
+### 1.2 Setup the eb-cli and configure
+
+- You must install the [eb-cli](https://docs.aws.amazon.com/fr_fr/elasticbeanstalk/latest/dg/eb-cli3-install-windows.html) in order to deploy.
+
+- Configure the deployment:<br>
+There is already a configuration file under the directory **AWS.Beanstalk.WebApplication\scripts\deploy\\.elasticbeanstalk\\**, however you can replace with a new one with command:
+
+```
+eb init
+```
+
+This will create the application in Elasticbeanstalk console.
+
+- You can create the aplication and its environment with the cli but I prefer doing it via console. <br>
+Under [ElasticBeanstalk console](https://console.aws.amazon.com/elasticbeanstalk), create an application then its environment with selected platform **.NET (Windows/IIS)**.
+
 ## 2. Getting started
 
-- Run the script **AWS.Beanstalk.WebApplication\scripts\pack.bat** to generate the application file **bundle.zip** in the **output** directory.
-This bundle contains :<br>
+- In directory **AWS.Beanstalk.WebApplication\scripts**, run the script **pack.bat** to build the application. This will generate into the **output** directory.
+
+- In directory **AWS.Beanstalk.WebApplication\scripts**, run the script **deploy.bat** to deploy the application. This will generate a bundle zip file into the **deploy** directory. The bundle will be deployed to your elasticbeanstalk environment, by leveraging the **eb deploy** command with your Elasticbeanstalk configuration.
+
+The bundle uploaded contains :<br>
     * the application binaries
     * .ebextensions configuration files allowing:
         * custom [environment variables](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-softwaresettings.html) (in [ElasticBeanstalk console](https://console.aws.amazon.com/elasticbeanstalk): **Configuration > Software > Environment properties**)
@@ -53,11 +72,18 @@ This bundle contains :<br>
         * X-Ray daemon setup ... etc 
 	* a [manifest](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/dotnet-manifest.html) **aws-windows-deployment-manifest.json** describing the deployment in IIS
 
-- Under [ElasticBeanstalk console](https://console.aws.amazon.com/elasticbeanstalk), create an application then its environment with selected platform **.NET (Windows/IIS)** and upload the **bundle.zip** file.
-
 - Once the environment is created, browse the website
     * play with the product page. Product items will be stored and retrieved from generated **Product** dynamoDB table.
-    * check the [X-Ray console](https://aws.amazon.com/xray) for insights.
+    * check the [X-Ray console](https://aws.amazon.com/xray) for insights.<br>
+    You can filter traces on annotations via the search bar, by example:
+
+    ```
+    # filter on create product operation
+    annotation.operationType="CreateProduct"
+
+    # filter on all type of operations with product
+    annotation.operationType CONTAINS "Product"
+    ```
 
     Service map in X-Ray:
 

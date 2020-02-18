@@ -10,16 +10,16 @@ namespace AWS.Beanstalk.WebApplication.Utils
 {
     public class ConfigHelper
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(ConfigHelper));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ConfigHelper));
 
         public static string Get(string envvariable)
         {
             NameValueCollection appConfig = ConfigurationManager.AppSettings;
             string envvalue = appConfig[envvariable];
             if (string.IsNullOrEmpty(envvalue))
-                log.Error($"environment variable '{envvariable}' not found !");            
+                _log.Error($"environment variable '{envvariable}' not found !");            
             else
-                log.Info($"Find environment variable '{envvariable}'={envvalue}");
+                _log.Info($"Find environment variable '{envvariable}'={envvalue}");
 
             return envvalue;
         }

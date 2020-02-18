@@ -5,6 +5,5 @@ pushd site
 move .ebextensions ..\
 "C:\Program Files\7-Zip\7z.exe" -tzip a ../site.zip .
 popd
-copy ..\aws-windows-deployment-manifest.json .
-"C:\Program Files\7-Zip\7z.exe" -tzip a bundle.zip . -x!site
+RMDIR "site" /S /Q
 pause
