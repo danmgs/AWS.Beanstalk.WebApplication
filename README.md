@@ -83,7 +83,12 @@ eb init
 
 Follow instructions to generate the elasticbeanstalk application and its environment in [elasticbeanstalk console](https://console.aws.amazon.com/elasticbeanstalk).
 
-![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/configure_eb_app_env.PNG)
+    <details>
+      <summary>Click to expand details</summary>
+
+        ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/configure_eb_app_env.PNG)
+
+    </details>
 
 This will generate the configuration file **AWS.Beanstalk.WebApplication\scripts\deploy\\.elasticbeanstalk\\** which will be used further by the **script\deploy.bat**.
 
@@ -168,7 +173,6 @@ eb use Appdemo-env
     ```
 
     :mag_right: Filtering
-
     <details>
       <summary>Click to expand details</summary>
 
@@ -179,7 +183,6 @@ eb use Appdemo-env
         ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_segment_details_annotations.PNG)
 
     </details>
-    <br/>
 
 ## 4. Useful resources
 
