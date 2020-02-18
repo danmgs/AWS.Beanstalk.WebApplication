@@ -153,6 +153,10 @@ eb use Appdemo-env
 
     * check the [X-Ray console](https://aws.amazon.com/xray) for insights.
 
+    Service map in X-Ray:
+
+    ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_service_map.PNG)
+
     You can filter traces on annotations via the search bar, by example:
 
     ```
@@ -163,10 +167,11 @@ eb use Appdemo-env
     annotation.operationType CONTAINS "Product"
     ```
 
-    Service map in X-Ray:
+    ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_filter.PNG)
 
-    ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_service_map.PNG)
+    ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_segment_details.PNG)
 
+    ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_segment_details_annotations.PNG)
 
 ## 4. Useful resources
 
