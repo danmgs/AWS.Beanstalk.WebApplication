@@ -10,18 +10,18 @@ Main components are highlighted below :
 
 ```
 |
-| -- /AWS.Beanstalk.WebApplication/                                   -> the .NET application
+| -- /AWS.Beanstalk.WebApplication/                               -> the .NET application
         |
-        | -- appsettings.json                                         -> The configuration file
+        | -- appsettings.json                                     -> The configuration file
         |
         | -- /Controllers/
                 | -- ProductController.cs
         |
         | -- /scripts/
                 | -- /deploy/
-                        | -- aws-windows-deployment-manifest.json     -> the manisfest  file for deployment under Windows IIS
-                | -- build.bat                                        -> the script for build the .NET application
-                | -- deploy.bat                                       -> the script for deployment to elasticbeanstalk
+                        | -- aws-windows-deployment-manifest.json -> manisfest for deployment under Windows IIS
+                | -- build.bat                                    -> script for build the .NET application
+                | -- deploy.bat                                   -> script for deployment to elasticbeanstalk
 
 ```
 
@@ -167,11 +167,19 @@ eb use Appdemo-env
     annotation.operationType CONTAINS "Product"
     ```
 
-    ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_filter.PNG)
+    :mag_right: Filtering
 
-    ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_segment_details.PNG)
+    <details>
+      <summary>Click to expand details</summary>
 
-    ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_segment_details_annotations.PNG)
+        ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_filter.PNG)
+
+        ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_segment_details.PNG)
+
+        ![alt capture](https://github.com/danmgs/AWS.Beanstalk.WebApplication/blob/master/img/xray_segment_details_annotations.PNG)
+
+    </details>
+    <br/>
 
 ## 4. Useful resources
 
